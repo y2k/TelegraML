@@ -134,6 +134,9 @@ let edit_message_caption ~id ?reply_markup =
 let edit_message_reply_markup ~id ~reply_markup =
   EditMessageReplyMarkup (id, Some reply_markup)
 
+let delete_message ~chat_id ~message_id =
+  DeleteMessage (chat_id, message_id)
+
 let get_updates ~and_then =
   GetUpdates and_then
 

@@ -1528,6 +1528,7 @@ module Command = struct
     | PeekUpdate of (Update.update Result.result -> action)
     | PopUpdate of bool * (Update.update Result.result -> action)
     | Chain of action * action
+    | DeleteMessage of int * int
 
   type command = {
     name            : string;
@@ -1646,6 +1647,7 @@ module type TELEGRAM_BOT = sig
   val edit_message_text : ?chat_id:string option -> ?message_id:int option -> ?inline_message_id:string option -> text:string -> parse_mode:ParseMode.parse_mode option -> disable_web_page_preview:bool -> reply_markup:ReplyMarkup.reply_markup option -> unit -> unit Result.result Lwt.t
   val edit_message_caption : ?chat_id:string option -> ?message_id:int option -> ?inline_message_id:string option -> caption:string -> reply_markup:ReplyMarkup.reply_markup option -> unit -> unit Result.result Lwt.t
   val edit_message_reply_markup : ?chat_id:string option -> ?message_id:int option -> ?inline_message_id:string option -> reply_markup:ReplyMarkup.reply_markup option -> unit -> unit Result.result Lwt.t
+  val delete_message : chat_id:int -> message_id:int -> unit -> unit Result.result Lwt.t
   val get_updates : Update.update list Result.result Lwt.t
   val peek_update : Update.update Result.result Lwt.t
   val pop_update : ?run_cmds:bool -> unit -> Update.update Result.result Lwt.t
@@ -2060,6 +2062,19 @@ module Mk (B : BOT) = struct
     | `Bool true -> Result.Success (List.map Update.read @@ the_list @@ get_field "result" obj)
     | _ -> Result.Failure (the_string @@ get_field "description" obj)
 
+  let delete_message ~chat_id ~message_id () =
+    let body =
+      `Assoc [("chat_id", `Int chat_id); ("message_id", `Int message_id)]
+      |> Yojson.Safe.to_string
+    in
+    let headers = Cohttp.Header.init_with "Content-Type" "application/json" in
+    Client.post ~headers ~body:(Cohttp_lwt.Body.of_string body) (Uri.of_string (url ^ "deleteMessage")) >>= fun (_(*resp*), body) ->
+    Cohttp_lwt.Body.to_string body >>= fun json ->
+    let obj = Yojson.Safe.from_string json in
+    return @@ match get_field "ok" obj with
+    | `Bool true -> Result.Success ()
+    | _ -> Result.Failure ((fun x -> print_endline x; x) @@ the_string @@ get_field "description" obj)
+
   let offset = ref 0
   let clear_update () =
     let json = `Assoc [("offset", `Int !offset);
@@ -2216,6 +2231,7 @@ module Mk (B : BOT) = struct
     | PeekUpdate f -> peek_update |> eval f
     | PopUpdate (run_cmds, f) -> pop_update ~run_cmds () |> eval f
     | Chain (first, second) -> evaluator first >> evaluator second
+    | DeleteMessage (chat_id, message_id) -> delete_message ~chat_id ~message_id () |> dispose
 
   let run ?(log=true) () =
     let process = function

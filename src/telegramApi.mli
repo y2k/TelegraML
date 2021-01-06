@@ -1173,6 +1173,7 @@ module Command : sig
     | PeekUpdate of (Update.update Result.result -> action)
     | PopUpdate of bool * (Update.update Result.result -> action)
     | Chain of action * action
+    | DeleteMessage of int * int
 
   (** This type is used to represent available commands. The [name] field is the command's name (without a slash) and the [description] field is the description to be used in the help message. [run] is the function called when invoking the command. *)
   type command = {
@@ -1373,6 +1374,8 @@ module type TELEGRAM_BOT = sig
 
   (** Edit the reply markup of an existing message, selected by either the chat id, the message id, or the inline message id. Use [None] to remove the reply markup *)
   val edit_message_reply_markup : ?chat_id:string option -> ?message_id:int option -> ?inline_message_id:string option -> reply_markup:ReplyMarkup.reply_markup option -> unit -> unit Result.result Lwt.t
+
+  val delete_message : chat_id:int -> message_id:int -> unit -> unit Result.result Lwt.t
 
   (** Get a list of all available updates that the bot has received *)
   val get_updates : Update.update list Result.result Lwt.t
