@@ -12,6 +12,7 @@ depends: [
   "fmt"
   "logs"
   "batteries"
+  "yojson"
 ]
 build: [
   ["dune" "subst"] {pinned}
