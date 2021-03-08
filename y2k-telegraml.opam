@@ -13,6 +13,7 @@ depends: [
   "logs"
   "batteries"
   "yojson"
+  "cohttp-lwt-unix"
 ]
 build: [
   ["dune" "subst"] {pinned}
