@@ -88,6 +88,7 @@ module MessageEntity : sig
     | Italic
     | Code
     | Pre
+    | StrikeThrough
     | TextLink of string
     | TextMention of User.user
 
