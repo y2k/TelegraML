@@ -94,7 +94,7 @@ module MessageEntity = struct
         | Some user -> TextMention user
         | None -> raise @@ ApiException "MessageEntity of type 'text_mention' missing user"
       end
-    | _ -> raise @@ ApiException "Unrecognized type of MessageEntity encountered"
+    | entity_type -> raise @@ ApiException ("Unrecognized type of MessageEntity encountered (" ^ entity_type ^ ")")
 
   type message_entity = {
     entity_type : entity_type;
@@ -2244,6 +2244,8 @@ module Mk (B : BOT) = struct
       pop_update ~run_cmds:true () >>= process >>= loop in
     while true do (* Recover from errors if an exception is thrown *)
       try Lwt_main.run @@ loop ()
-      with _ -> ()
+      with e ->
+        Printexc.to_string e |> print_endline;
+        ()
     done
 end
