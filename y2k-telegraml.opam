@@ -11,6 +11,7 @@ depends: [
   "alcotest"
   "fmt"
   "logs"
+  "batteries"
 ]
 build: [
   ["dune" "subst"] {pinned}
