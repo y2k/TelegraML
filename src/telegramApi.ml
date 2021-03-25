@@ -74,6 +74,7 @@ module MessageEntity = struct
     | Code
     | Pre
     | StrikeThrough
+    | PhoneNumber
     | TextLink of string
     | TextMention of User.user
 
@@ -88,6 +89,7 @@ module MessageEntity = struct
     | "code" -> Code
     | "pre" -> Pre
     | "strikethrough" -> StrikeThrough
+    | "phone_number" -> PhoneNumber
     | "text_link" -> begin match url with
         | Some url -> TextLink url
         | None -> raise @@ ApiException "MessageEntity of type 'text_link' missing url"

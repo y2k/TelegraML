@@ -89,6 +89,7 @@ module MessageEntity : sig
     | Code
     | Pre
     | StrikeThrough
+    | PhoneNumber
     | TextLink of string
     | TextMention of User.user
 
